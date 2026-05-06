@@ -48,7 +48,7 @@ elif 4 <= release_date.month <= 6:
 # Bundle inputs for Formula
 inputs = {
     "talent_score": t_data['score'],
-    "market_base": 85,         
+    "market_base": 80,         
     "market_multiplier": m_market,
     "has_clash": has_clash,
     "content_score": GENRE_METRICS[genre]['base_score'],
