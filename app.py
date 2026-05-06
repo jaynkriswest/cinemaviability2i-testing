@@ -10,7 +10,7 @@ st.markdown("---")
 # Sidebar for Inputs
 with st.sidebar:
     st.header("Project Parameters")
-    actor = st.selectbox("Lead Actor", list(SOUTH_INDIAN_TALENT_DB.keys()))[cite: 3]
+    actor = st.selectbox("Lead Actor", list(SOUTH_INDIAN_TALENT_DB.keys()))
     genre = st.selectbox("Genre", ["Action/Mass", "Drama", "Thriller", "Romance", "Comedy"])
     budget = st.number_input("Budget (in Crores)", min_value=1, value=50)
     festive_release = st.checkbox("Festive/Holiday Release?")
