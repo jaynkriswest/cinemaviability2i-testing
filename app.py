@@ -9,19 +9,19 @@ with st.sidebar:
     st.header("1. Talent & Content")
     actor = st.selectbox("Lead Actor", list(SOUTH_INDIAN_TALENT_DB.keys()))
     genre = st.selectbox("Genre", list(GENRE_BASELINES.keys()))
-    is_franchise = st.checkbox("IP / Franchise Sequel? (1.4x Bonus)")[cite: 10]
+    is_franchise = st.checkbox("IP / Franchise Sequel? (1.4x Bonus)")
     
     st.header("2. Market & Season")
     window = st.selectbox("Release Window", ["Sankranti", "Summer", "Monsoon", "Normal"])
-    clash = st.checkbox("Major Superstar Clash? (-0.15 Penalty)")[cite: 10]
+    clash = st.checkbox("Major Superstar Clash? (-0.15 Penalty)")
     
     st.header("3. Distribution & Reach")
     cert = st.selectbox("Certification", ["U", "UA", "A"])
-    m_cert = {"U": 1.2, "UA": 1.0, "A": 0.7}[cert][cite: 10]
+    m_cert = {"U": 1.2, "UA": 1.0, "A": 0.7}[cert]
 
-# Mapping Seasonal/Market scores from v3i document[cite: 10]
+# Mapping Seasonal/Market scores from v3i document
 market_scores = {"Sankranti": 100, "Summer": 90, "Monsoon": 75, "Normal": 70}
-s_market = market_scores[window] - (15 if clash else 0) # Apply Clash Penalty[cite: 10]
+s_market = market_scores[window] - (15 if clash else 0) # Apply Clash Penalty]
 
 # Execute Logic
 results = {

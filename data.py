@@ -19,4 +19,4 @@ GENRE_BASELINES = {
 }
 
 def get_talent_weight(name):
-    return SOUTH_INDIAN_TALENT_DB.get(name, {"score": 60, "category": "Rising Star"})[cite: 10]
+    return SOUTH_INDIAN_TALENT_DB.get(name, {"score": 60, "category": "Rising Star"})
