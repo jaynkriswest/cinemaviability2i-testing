@@ -1,23 +1,35 @@
-def calculate_cinema_logic(talent_score, genre_weight, season_multiplier, budget, target_market):
+# formula.py
+
+def calculate_v3i_logic(inputs):
     """
-    Advanced Interaction Logic for Cinema Predictability.
+    Implements Predictability (%) = [Weighted Pillars] x M_Cert x M_Align[cite: 10]
     """
-    # 1. Base Score calculation
-    base_score = (talent_score * 0.4) + (genre_weight * 0.3) + (target_market * 0.3)
-
-    # 2. Interaction Multiplier Block: Synergy between Veteran Talent and Festivals
-    # Veterans + Festive releases (like Sankranthi) often over-perform
-    synergy_bonus = 1.0
-    if talent_score > 90 and season_multiplier > 1.1:
-        synergy_bonus = 1.15  # 15% boost for "Mega" synergy
-
-    # 3. Budget-Risk Penalty
-    # High budgets without Pan-India appeal are mathematically riskier
-    risk_penalty = 1.0
-    if budget > 100 and target_market < 80:
-        risk_penalty = 0.85  # 15% penalty for budget-market mismatch
-
-    final_probability = base_score * season_multiplier * synergy_bonus * risk_penalty
+    # 1. Extract Pillar Scores[cite: 10]
+    s_talent = inputs['talent_score']
+    s_market = inputs['market_score']
+    s_content = inputs['content_score']
+    s_viral = inputs['viral_score']
+    s_seasonal = inputs['seasonal_score']
     
-    # Cap the probability at 99% for logical realism
-    return min(final_probability, 99.0)
+    # 2. Weighted Sum (The Core Probability)[cite: 10]
+    core_sum = (
+        (s_talent * 0.30) + 
+        (s_market * 0.20) + 
+        (s_content * 0.20) + 
+        (s_viral * 0.15) + 
+        (s_seasonal * 0.15)
+    )
+    
+    # 3. Apply Global Reach Multipliers[cite: 10]
+    # M_Cert: U (1.2), UA (1.0), A (0.7)
+    # M_Align: Consistent (1.0), Misaligned (0.9)
+    final_predictability = core_sum * inputs['m_cert'] * inputs['m_align']
+    
+    # 4. ROI Prediction[cite: 5, 10]
+    # ROI = ((Revenue - Budget) / Budget) * 100
+    # Revenue is scaled by the predictability score and franchise bonuses
+    revenue_multiplier = 1.4 if inputs['is_franchise'] else 1.0[cite: 10]
+    est_revenue = (final_predictability / 100) * (inputs['budget'] * 2.5) * revenue_multiplier
+    roi = ((est_revenue - inputs['budget']) / inputs['budget']) * 100
+
+    return min(final_predictability, 99.0), roi

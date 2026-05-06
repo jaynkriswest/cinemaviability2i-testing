@@ -1,48 +1,43 @@
+# app.py
 import streamlit as st
-from formula import calculate_cinema_logic
-from data import SOUTH_INDIAN_TALENT_DB, get_talent_weight
+from data import SOUTH_INDIAN_TALENT_DB, GENRE_BASELINES, get_talent_weight
+from formula import calculate_v3i_logic
 
-st.set_page_config(page_title="Cinema Predictor Pro", layout="wide")
+st.title("Cinema Predictability")
 
-st.title("Cinema Predictability AI (v5.0)")
-st.markdown("---")
-
-# Sidebar for Inputs
 with st.sidebar:
-    st.header("Project Parameters")
+    st.header("1. Talent & Content")
     actor = st.selectbox("Lead Actor", list(SOUTH_INDIAN_TALENT_DB.keys()))
-    genre = st.selectbox("Genre", ["Action/Mass", "Drama", "Thriller", "Romance", "Comedy"])
-    budget = st.number_input("Budget (in Crores)", min_value=1, value=50)
-    festive_release = st.checkbox("Festive/Holiday Release?")
+    genre = st.selectbox("Genre", list(GENRE_BASELINES.keys()))
+    is_franchise = st.checkbox("IP / Franchise Sequel? (1.4x Bonus)")[cite: 10]
+    
+    st.header("2. Market & Season")
+    window = st.selectbox("Release Window", ["Sankranti", "Summer", "Monsoon", "Normal"])
+    clash = st.checkbox("Major Superstar Clash? (-0.15 Penalty)")[cite: 10]
+    
+    st.header("3. Distribution & Reach")
+    cert = st.selectbox("Certification", ["U", "UA", "A"])
+    m_cert = {"U": 1.2, "UA": 1.0, "A": 0.7}[cert][cite: 10]
 
-# Logic Mapping
-talent_info = get_talent_weight(actor)
-genre_weights = {"Action/Mass": 95, "Drama": 85, "Thriller": 80, "Romance": 75, "Comedy": 70}
-season_mult = 1.2 if festive_release else 1.0
+# Mapping Seasonal/Market scores from v3i document[cite: 10]
+market_scores = {"Sankranti": 100, "Summer": 90, "Monsoon": 75, "Normal": 70}
+s_market = market_scores[window] - (15 if clash else 0) # Apply Clash Penalty[cite: 10]
 
-# Calculate using the Interaction Multiplier
-final_score = calculate_cinema_logic(
-    talent_score=talent_info["score"],
-    genre_weight=genre_weights[genre],
-    season_multiplier=season_mult,
-    budget=budget,
-    target_market=90 # Defaulting to high market reach for this example
-)
+# Execute Logic
+results = {
+    "talent_score": get_talent_weight(actor)["score"],
+    "market_score": s_market,
+    "content_score": GENRE_BASELINES[genre],
+    "viral_score": 85, # Defaulting for now
+    "seasonal_score": 90 if window != "Normal" else 70,
+    "m_cert": m_cert,
+    "m_align": 1.0,
+    "budget": 100,
+    "is_franchise": is_franchise
+}
 
-# GUI Display
-col1, col2 = st.columns(2)
-with col1:
-    st.metric("Success Probability", f"{final_score:.1f}%")
-    if final_score > 85:
-        st.success("Verdict: Blockbuster Potential")
-    elif final_score > 70:
-        st.info("Verdict: Safe Bet")
-    else:
-        st.warning("Verdict: High Risk")
+prob, roi = calculate_v3i_logic(results)
 
-with col2:
-    st.subheader("Logic Breakdown")
-    st.write(f"**Talent Category:** {talent_info['category']}")
-    st.write(f"**Base Talent Weight:** {talent_info['score']}")
-    if festive_release and talent_info['category'] == "Ultra-Veteran":
-        st.write("*Mega-Synergy Multiplier Applied*")
+# Display Results
+st.metric("Predictability Score", f"{prob:.1f}%")
+st.metric("Projected ROI", f"{roi:.1f}%")
