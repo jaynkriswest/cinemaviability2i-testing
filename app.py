@@ -96,7 +96,7 @@ with st.sidebar:
 
     genre = st.selectbox("Genre", list(GENRE_METRICS.keys()), index=list(GENRE_METRICS.keys()).index(default_genre))
     
-    actor_key = st.selectbox("Lead Actor", list(ACTORS.keys()))
+    actor_key = st.selectbox("Lead Actor", list(SOUTH_INDIAN_ACTORS.keys()))
     director_key = st.selectbox("Director", list(DIRECTORS.keys()))
     
     release_date = st.date_input("Release Date", value=date(2026, 1, 12))
