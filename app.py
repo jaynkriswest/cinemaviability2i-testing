@@ -7,15 +7,14 @@ from data import GENRE_METRICS
 from formula import calculate_v3i_logic
 
 # 1. SETUP & SECURITY
-# Loads local .env for local testing; Streamlit Cloud uses its own Secrets
 load_dotenv()
 
 # Use secrets from Streamlit Cloud or local .env file
 OMDB_API_KEY = st.secrets.get("OMDB_API_KEY") or os.getenv("OMDB_API_KEY")
 TMDB_API_KEY = st.secrets.get("TMDB_API_KEY") or os.getenv("TMDB_API_KEY")
 
-st.set_page_config(page_title="v3i Real-Time Predictor", layout="wide")
-st.title("🎬 South Indian Cinema Predictability Model v3i")
+st.set_page_config(page_title="Real-Time Predictor v3i", layout="wide")
+st.title("South Indian Cinema Predictability Model v3i")
 
 # 2. DATA FETCHING FUNCTION
 def fetch_movie_metadata(title):
@@ -33,7 +32,7 @@ def fetch_movie_metadata(title):
     
     tmdb_details = {}
     if tmdb_search.get('results') and len(tmdb_search['results']) > 0:
-        # FIX: Access the first result to get the ID correctly
+        # FIXED: Access the first result to get the ID
         movie_id = tmdb_search['results']['id']
         details_url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={TMDB_API_KEY}&append_to_response=credits"
         tmdb_details = requests.get(details_url).json()
@@ -43,7 +42,7 @@ def fetch_movie_metadata(title):
 # 3. SIDEBAR INPUTS
 with st.sidebar:
     st.header("Real-Time Search")
-    search_query = st.text_input("Enter Movie Title", value="Mana Shankara Varaprasad Garu")
+    search_query = st.text_input("Enter Movie Title", value="")
     
     omdb, tmdb = None, None
     if search_query:
@@ -57,7 +56,7 @@ with st.sidebar:
         cert_val = omdb.get("Rated", "UA")
         m_cert = {"U": 1.2, "UA": 1.0, "U/A": 1.0, "A": 0.7}.get(cert_val, 1.0)
         
-        # FIX: Parse Genre correctly (Take the first word and clean spaces)
+        # FIXED: Parse Genre correctly (Take the first word and clean spaces)
         raw_genre = omdb.get("Genre", "Action")
         first_genre = raw_genre.split(",").strip()
         genre = first_genre if first_genre in GENRE_METRICS else "Action"
@@ -93,7 +92,7 @@ inputs = {
     "market_base": 85,
     "market_multiplier": m_market,
     "has_clash": has_clash,
-    "content_score": GENRE_METRICS[genre]['base_score'], # Works now that genre is a string
+    "content_score": GENRE_METRICS[genre]['base_score'],
     "viral_score": viral_map[viral_tier],
     "seasonal_score": 85 if m_market > 1.0 else 70,
     "m_cert": m_cert,
