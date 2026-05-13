@@ -6,7 +6,7 @@ import os
 from dotenv import load_dotenv
 from datetime import date
 import logging
-from data import GENRE_METRICS, ACTORS, DIRECTORS, SEASONAL_MULTIPLIERS
+from data import GENRE_METRICS, SOUTH_INDIAN_ACTORS, DIRECTORS, SEASONAL_MULTIPLIERS
 from formula import calculate_v3i_logic, get_detailed_report
 
 # =====================================================
@@ -115,7 +115,7 @@ if omdb:
     m_market = SEASONAL_MULTIPLIERS.get(release_date.month, 1.0)
     
     calc_inputs = {
-        "talent_score": (ACTORS[actor_key]['score'] + DIRECTORS[director_key]['score']) / 2,
+        "talent_score": (SOUTH_INDIAN_ACTORS[actor_key]['score'] + DIRECTORS[director_key]['score']) / 2,
         "market_base": 85,
         "market_multiplier": m_market,
         "has_clash": has_clash,
