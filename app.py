@@ -13,8 +13,8 @@ load_dotenv()
 OMDB_API_KEY = st.secrets.get("OMDB_API_KEY") or os.getenv("OMDB_API_KEY")
 TMDB_API_KEY = st.secrets.get("TMDB_API_KEY") or os.getenv("TMDB_API_KEY")
 
-st.set_page_config(page_title="Real-Time Predictor v3i", layout="wide")
-st.title("South Indian Cinema Predictability Model v3ss")
+st.set_page_config(page_title="v3i Real-Time Predictor", layout="wide")
+st.title("🎬 South Indian Cinema Predictability Model v3i")
 
 # 2. DATA FETCHING FUNCTION
 def fetch_movie_metadata(title):
