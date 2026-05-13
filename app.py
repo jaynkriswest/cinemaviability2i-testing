@@ -1,3 +1,5 @@
+#Clde version
+
 import streamlit as st
 import requests
 import os
@@ -275,7 +277,7 @@ with st.sidebar:
     st.info(f"**Talent Score: {talent_score}/100** ({talent_tier})")
     
     # ========== FINANCIAL PILLAR ==========
-    st.header("2️Financial & Distribution")
+    st.header("Financial & Distribution")
     
     col_budget, col_market = st.columns(2)
     
@@ -301,7 +303,7 @@ with st.sidebar:
         )
     
     # ========== CONTENT PILLAR ==========
-    st.header("3️Content & Genre")
+    st.header("Content & Genre")
     
     # Extract genre from OMDB if available
     omdb_genre = None
@@ -323,7 +325,7 @@ with st.sidebar:
     is_franchise = script_type == "Franchise/Sequel"
     
     # ========== RELEASE & TIMING ==========
-    st.header("4️Release Schedule")
+    st.header("Release Schedule")
     
     release_date = st.date_input(
         "Target Release Date",
@@ -349,7 +351,7 @@ with st.sidebar:
     st.divider()
     
     # ========== ADDITIONAL FACTORS ==========
-    st.header("5️Market Factors")
+    st.header("Market Factors")
     
     col_cert, col_vir = st.columns(2)
     
@@ -399,7 +401,7 @@ with col_main_left:
             st.write(f"**IMDb Rating:** {omdb_data.get('imdbRating')}")
     
     # ========== CALCULATE BUTTON ==========
-    if st.button("🔮 Calculate Predictability", use_container_width=True, type="primary"):
+    if st.button("Calculate Predictability", use_container_width=True, type="primary"):
         
         # Prepare inputs for formula
         m_market = 1.0
