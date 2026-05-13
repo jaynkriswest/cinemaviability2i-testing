@@ -62,7 +62,7 @@ def fetch_detailed_data(imdb_id):
 # UI LAYOUT
 # =====================================================
 
-st.title("🎬 South Indian Cinema Predictability Model v3i")
+st.title("South Indian Cinema Predictability Model v3i")
 
 with st.sidebar:
     st.header("Step 1: Movie Search")
