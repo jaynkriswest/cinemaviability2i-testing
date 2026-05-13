@@ -7,7 +7,7 @@ import requests
 import os
 from dotenv import load_dotenv
 from datetime import date
-import logging
+from difflib import SequenceMatcher
 
 # =====================================================
 # IMPORT LOCAL MODULES
@@ -25,12 +25,10 @@ from formula import (
 )
 
 # =====================================================
-# SETUP & CONFIGURATION
+# SETUP
 # =====================================================
 
 load_dotenv()
-
-logging.basicConfig(level=logging.INFO)
 
 st.set_page_config(
     page_title="v3i Cinema Predictor",
@@ -38,7 +36,7 @@ st.set_page_config(
 )
 
 # =====================================================
-# API KEYS
+# API KEY
 # =====================================================
 
 TMDB_API_KEY = (
@@ -46,22 +44,29 @@ TMDB_API_KEY = (
     or os.getenv("TMDB_API_KEY")
 )
 
-# =====================================================
-# VALIDATION
-# =====================================================
-
 if not TMDB_API_KEY:
-    st.error("Missing TMDB_API_KEY in Streamlit secrets.")
+    st.error("Missing TMDB_API_KEY")
     st.stop()
 
 # =====================================================
-# TMDB SEARCH FUNCTION
+# DISPLAY HELPERS
+# =====================================================
+
+ACTOR_DISPLAY_MAP = {
+    key: key.replace("_", " ").title()
+    for key in SOUTH_INDIAN_ACTORS.keys()
+}
+
+DIRECTOR_DISPLAY_MAP = {
+    key: key.replace("_", " ").title()
+    for key in DIRECTORS.keys()
+}
+
+# =====================================================
+# TMDB SEARCH
 # =====================================================
 
 def search_movies_list(query):
-    """
-    Search TMDB for movies.
-    """
 
     try:
 
@@ -84,7 +89,10 @@ def search_movies_list(query):
 
         for movie in data.get("results", []):
 
-            release_date = movie.get("release_date", "")
+            release_date = movie.get(
+                "release_date",
+                ""
+            )
 
             year = (
                 release_date[:4]
@@ -101,11 +109,11 @@ def search_movies_list(query):
         return results
 
     except Exception as e:
-        st.error(f"TMDB search error: {e}")
+        st.error(f"Search error: {e}")
         return []
 
 # =====================================================
-# FETCH MOVIE DETAILS
+# FETCH DETAILS
 # =====================================================
 
 def fetch_detailed_data(tmdb_id):
@@ -172,103 +180,219 @@ def fetch_detailed_data(tmdb_id):
         return movie_data, tmdb
 
     except Exception as e:
-        st.error(f"TMDB detail fetch error: {e}")
+        st.error(f"Movie detail error: {e}")
         return None, None
 
 # =====================================================
-# APP TITLE
+# SIMILAR MOVIES
 # =====================================================
 
-st.title("South Indian Cinema Predictability Model v3i")
+def get_similar_movies(tmdb_id):
+
+    try:
+
+        url = (
+            f"https://api.themoviedb.org/3/movie/{tmdb_id}/similar"
+            f"?api_key={TMDB_API_KEY}"
+        )
+
+        response = requests.get(
+            url,
+            timeout=15
+        )
+
+        response.raise_for_status()
+
+        data = response.json()
+
+        return data.get("results", [])[:10]
+
+    except Exception as e:
+        st.error(f"Similar movie error: {e}")
+        return []
 
 # =====================================================
-# SIDEBAR
+# MOVIE DETAILS BY ID
 # =====================================================
 
-with st.sidebar:
+def get_movie_details_by_id(movie_id):
 
-    st.header("Step 1: Movie Search")
+    try:
 
-    search_query = st.text_input(
-        "Enter Movie Title",
-        value="Apex"
+        url = (
+            f"https://api.themoviedb.org/3/movie/{movie_id}"
+            f"?api_key={TMDB_API_KEY}"
+        )
+
+        response = requests.get(
+            url,
+            timeout=15
+        )
+
+        response.raise_for_status()
+
+        return response.json()
+
+    except:
+        return {}
+
+# =====================================================
+# LIKENESS SCORE
+# =====================================================
+
+def calculate_likeness_score(
+    movie_data,
+    similar_movie
+):
+
+    score = 0
+
+    current_genres = set(
+        movie_data.get(
+            "Genre",
+            ""
+        ).lower().split(",")
     )
 
-    movie_data = None
-    tmdb_data = None
-
-    # =====================================================
-    # SEARCH RESULTS
-    # =====================================================
-
-    if search_query:
-
-        search_results = search_movies_list(
-            search_query
-        )
-
-        if search_results:
-
-            options = {
-                f"{movie['Title']} ({movie['Year']})":
-                movie["tmdbID"]
-
-                for movie in search_results
-            }
-
-            selected_label = st.selectbox(
-                "Step 2: Select Movie",
-                list(options.keys())
+    similar_genres = set(
+        [
+            genre["name"].lower()
+            for genre in similar_movie.get(
+                "genres",
+                []
             )
+        ]
+    )
 
-            if selected_label:
+    genre_overlap = len(
+        current_genres.intersection(
+            similar_genres
+        )
+    )
 
-                movie_data, tmdb_data = (
-                    fetch_detailed_data(
-                        options[selected_label]
-                    )
-                )
+    score += genre_overlap * 20
 
-        else:
-            st.warning("No results found.")
+    title_similarity = SequenceMatcher(
+        None,
+        movie_data.get("Title", ""),
+        similar_movie.get("title", "")
+    ).ratio()
 
-    st.divider()
+    score += title_similarity * 20
 
-    # =====================================================
-    # ANALYSIS SECTION
-    # =====================================================
+    popularity = similar_movie.get(
+        "popularity",
+        0
+    )
 
-    st.header("Step 3: Analyze Pillars")
+    score += min(popularity / 5, 30)
 
-    default_genre = "Action"
+    vote_average = similar_movie.get(
+        "vote_average",
+        0
+    )
 
-    if movie_data:
+    score += vote_average * 3
 
-        raw_genre = (
-            movie_data.get("Genre", "Action")
-            .split(",")[0]
-            .strip()
+    return round(min(score, 100), 1)
+
+# =====================================================
+# SUGGESTIONS ENGINE
+# =====================================================
+
+def generate_success_suggestions(
+    report,
+    release_date,
+    budget,
+    has_clash
+):
+
+    suggestions = []
+
+    if has_clash:
+        suggestions.append(
+            "Avoid releasing during superstar clashes."
         )
 
-        if raw_genre in GENRE_METRICS:
-            default_genre = raw_genre
+    weak_months = [7, 8, 9]
+
+    if release_date.month in weak_months:
+
+        suggestions.append(
+            "Shift release to January, April, October or December."
+        )
+
+    if budget > 250:
+
+        suggestions.append(
+            "Increase pan-India promotions and overseas distribution."
+        )
+
+    if report["predictability_score"] < 80:
+
+        suggestions.append(
+            "Increase trailer and teaser marketing."
+        )
+
+        suggestions.append(
+            "Use influencer and social media campaigns."
+        )
+
+    if report["roi_percentage"] < 20:
+
+        suggestions.append(
+            "Reduce production cost or increase theatrical reach."
+        )
+
+    suggestions.append(
+        "Target IMAX and premium multiplex screens."
+    )
+
+    suggestions.append(
+        "Expand overseas distribution in USA, UAE and Australia."
+    )
+
+    return suggestions
+
+# =====================================================
+# TITLE
+# =====================================================
+
+st.title("v3i Cinema Predictability Dashboard")
+
+st.markdown("---")
+
+# =====================================================
+# MAIN LAYOUT
+# =====================================================
+
+prediction_col, search_col = st.columns([1.1, 1])
+
+# =====================================================
+# LEFT SIDE - PREDICTION MONITOR
+# =====================================================
+
+with prediction_col:
+
+    st.header("Prediction Monitor")
 
     genre = st.selectbox(
         "Genre",
-        list(GENRE_METRICS.keys()),
-        index=list(GENRE_METRICS.keys()).index(
-            default_genre
-        )
+        list(GENRE_METRICS.keys())
     )
 
     actor_key = st.selectbox(
         "Lead Actor",
-        list(SOUTH_INDIAN_ACTORS.keys())
+        list(SOUTH_INDIAN_ACTORS.keys()),
+        format_func=lambda x:
+        ACTOR_DISPLAY_MAP[x]
     )
 
     director_key = st.selectbox(
         "Director",
-        list(DIRECTORS.keys())
+        list(DIRECTORS.keys()),
+        format_func=lambda x:
+        DIRECTOR_DISPLAY_MAP[x]
     )
 
     release_date = st.date_input(
@@ -280,33 +404,11 @@ with st.sidebar:
         "Superstar Clash?"
     )
 
-    # =====================================================
-    # BUDGET
-    # =====================================================
-
-    tmdb_budget = 0
-
-    if tmdb_data:
-        tmdb_budget = (
-            tmdb_data.get("budget", 0)
-            / 10_000_000
-        )
-
     budget = st.number_input(
         "Budget (Crores)",
         min_value=1.0,
-        value=(
-            float(tmdb_budget)
-            if tmdb_budget > 0
-            else 100.0
-        )
+        value=100.0
     )
-
-# =====================================================
-# MAIN DISPLAY
-# =====================================================
-
-if movie_data:
 
     market_multiplier = (
         SEASONAL_MULTIPLIERS.get(
@@ -342,47 +444,100 @@ if movie_data:
 
         "m_cert": 1.0,
 
-        "budget": (
-            budget
-            if budget > 0
-            else 1.0
-        ),
+        "budget": budget,
     }
 
     report = calculate_detailed_prediction(
         calc_inputs
     )
 
-    # =====================================================
-    # TOP METRICS
-    # =====================================================
+    st.subheader("Prediction Results")
 
-    col1, col2, col3 = st.columns(3)
+    c1, c2, c3 = st.columns(3)
 
-    col1.metric(
+    c1.metric(
         "Predictability",
         f"{report['predictability_score']}%"
     )
 
-    col2.metric(
-        "Estimated Revenue",
+    c2.metric(
+        "Revenue",
         f"₹{report['revenue_estimate']} Cr"
     )
 
-    col3.metric(
+    c3.metric(
         "ROI",
         f"{report['roi_percentage']}%"
     )
 
-    st.divider()
+    st.info(
+        f"Risk Level: {report['risk_level']}"
+    )
 
-    # =====================================================
-    # MOVIE INFO
-    # =====================================================
+    st.subheader("Success Suggestions")
 
-    left_col, right_col = st.columns([1, 2])
+    suggestions = (
+        generate_success_suggestions(
+            report,
+            release_date,
+            budget,
+            has_clash
+        )
+    )
 
-    with left_col:
+    for suggestion in suggestions:
+        st.write(f"• {suggestion}")
+
+# =====================================================
+# RIGHT SIDE - MOVIE SEARCH
+# =====================================================
+
+with search_col:
+
+    st.header("Movie Search & Historical Similarities")
+
+    search_query = st.text_input(
+        "Search Movie",
+        value="Apex"
+    )
+
+    movie_data = None
+    tmdb_data = None
+
+    if search_query:
+
+        search_results = search_movies_list(
+            search_query
+        )
+
+        if search_results:
+
+            options = {
+
+                f"{movie['Title']} "
+                f"({movie['Year']})":
+
+                movie["tmdbID"]
+
+                for movie in search_results
+            }
+
+            selected_label = st.selectbox(
+                "Select Movie",
+                list(options.keys())
+            )
+
+            if selected_label:
+
+                movie_data, tmdb_data = (
+                    fetch_detailed_data(
+                        options[selected_label]
+                    )
+                )
+
+    if movie_data:
+
+        st.markdown("---")
 
         poster = movie_data.get("Poster")
 
@@ -392,54 +547,124 @@ if movie_data:
                 use_container_width=True
             )
 
-    with right_col:
-
         st.subheader(
-            f"{movie_data.get('Title')} "
-            f"({movie_data.get('Year')})"
+            f"{movie_data['Title']} "
+            f"({movie_data['Year']})"
         )
 
         st.write(
             f"**Genre:** "
-            f"{movie_data.get('Genre', 'N/A')}"
-        )
-
-        st.write(
-            f"**Synopsis:** "
-            f"{movie_data.get('Plot', 'N/A')}"
+            f"{movie_data['Genre']}"
         )
 
         st.write(
             f"**Cast:** "
-            f"{movie_data.get('Actors', 'N/A')}"
+            f"{movie_data['Actors']}"
         )
-
-        st.info(
-            f"Risk Level: "
-            f"{report['risk_level']}"
-        )
-
-    # =====================================================
-    # BREAKDOWN
-    # =====================================================
-
-    st.divider()
-
-    st.subheader("Prediction Breakdown")
-
-    breakdown = report.get(
-        "breakdown",
-        {}
-    )
-
-    for key, value in breakdown.items():
 
         st.write(
-            f"**{key.title()} Score:** {value}"
+            f"**Synopsis:** "
+            f"{movie_data['Plot']}"
         )
 
-else:
+        st.markdown("---")
 
-    st.info(
-        "Search for a movie to begin."
-    )
+        st.subheader(
+            "Similar Historical Movies"
+        )
+
+        similar_movies = (
+            get_similar_movies(
+                options[selected_label]
+            )
+        )
+
+        if similar_movies:
+
+            for movie in similar_movies[:5]:
+
+                detailed_movie = (
+                    get_movie_details_by_id(
+                        movie["id"]
+                    )
+                )
+
+                likeness = (
+                    calculate_likeness_score(
+                        movie_data,
+                        detailed_movie
+                    )
+                )
+
+                title = detailed_movie.get(
+                    "title",
+                    "Unknown"
+                )
+
+                year = detailed_movie.get(
+                    "release_date",
+                    ""
+                )[:4]
+
+                rating = detailed_movie.get(
+                    "vote_average",
+                    "N/A"
+                )
+
+                popularity = detailed_movie.get(
+                    "popularity",
+                    0
+                )
+
+                revenue = detailed_movie.get(
+                    "revenue",
+                    0
+                )
+
+                budget_movie = detailed_movie.get(
+                    "budget",
+                    0
+                )
+
+                success_status = "Moderate"
+
+                if revenue > budget_movie * 2:
+                    success_status = "Blockbuster"
+
+                elif revenue > budget_movie:
+                    success_status = "Hit"
+
+                elif revenue < budget_movie:
+                    success_status = "Flop"
+
+                st.markdown(
+                    f"### {title} ({year})"
+                )
+
+                st.write(
+                    f"Likeness Score: {likeness}%"
+                )
+
+                st.write(
+                    f"TMDB Rating: {rating}"
+                )
+
+                st.write(
+                    f"Popularity: "
+                    f"{round(popularity, 1)}"
+                )
+
+                st.write(
+                    f"Revenue: ${revenue:,}"
+                )
+
+                st.write(
+                    f"Budget: ${budget_movie:,}"
+                )
+
+                st.write(
+                    f"Performance: "
+                    f"{success_status}"
+                )
+
+                st.markdown("---")
