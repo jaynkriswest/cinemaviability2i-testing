@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from datetime import date
 import logging
 from data import GENRE_METRICS, SOUTH_INDIAN_ACTORS, DIRECTORS, SEASONAL_MULTIPLIERS
-from formula import calculate_v3i_logic, get_detailed_report
+from formula import calculate_v3i_logic, calculate_detailed_prediction
 
 # =====================================================
 # SETUP & CONFIGURATION
@@ -126,7 +126,7 @@ if omdb:
         "budget": budget if budget > 0 else 1.0
     }
 
-    report = get_detailed_report(calc_inputs)
+    report = calculate_detailed_prediction(calc_inputs)
 
     # UI Metrics
     c1, c2, c3 = st.columns(3)
