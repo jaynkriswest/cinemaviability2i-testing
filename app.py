@@ -45,7 +45,6 @@ except ImportError:
 
 try:
     from formula import (
-        calculate_v3i_logic,
         calculate_detailed_prediction,
     )
 except ImportError:
@@ -70,7 +69,7 @@ except ImportError:
 # =====================================================
 
 ACTOR_DISPLAY_MAP = {
-    "Chiranjeevi": "chiranjeevi",
+    "Chirankeevi": "chiranjeevi",
     "Kamal Haasan": "kamal_haasan",
     "Rajinikanth": "rajinikanth",
 }
@@ -146,7 +145,7 @@ def get_similar_movies(title):
         logger.error(f"Error fetching similar movies: {e}")
     return []
 
-# Fetch genre map once dynamically to avoid empty values
+# Fetch genre maps once dynamically
 if "genre_id_map" not in st.session_state:
     try:
         g_url = "https://api.themoviedb.org/3/genre/movie/list"
@@ -158,7 +157,7 @@ if "genre_id_map" not in st.session_state:
         st.session_state["genre_id_map"] = {}
 
 # =====================================================
-# LAYOUT STRUCTURAL MATRIX (1.2 : 1 Ratio Split)
+# LAYOUT STRUCTURAL RATIO (1.2 : 1 Split)
 # =====================================================
 
 st.title("South Indian Cinema Predictability Model v5")
@@ -168,7 +167,7 @@ st.divider()
 prediction_col, search_col = st.columns([1.2, 1])
 
 # =====================================================
-# LEFT PANEL: CONFIGURATION INPUTS & RESULTS
+# LEFT PANEL: PREDICTABILITY ENGINE INPUTS & PILLARS
 # =====================================================
 
 with prediction_col:
@@ -227,7 +226,7 @@ with prediction_col:
         step=0.01
     )
 
-    # Text area specifically added to enable the NLP similarity workflow
+    # FIXED: Re-mapped text area tracking variable name to exactly match down-script dependencies
     future_synopsis_text = st.text_area(
         "Future Script Synopsis/Treatment (For Similarity Processing)",
         value="A dynamic protagonist works within an underground network, taking on powerful elements to restore equilibrium and rescue hostages.",
@@ -242,7 +241,6 @@ with prediction_col:
         actor_score = SOUTH_INDIAN_ACTORS[actor_key]["score"]
         director_score = DIRECTORS[director_key]["score"]
         
-        # Balance talent indices
         talent_score = (actor_score * 0.6) + (director_score * 0.4)
         content_score = GENRE_METRICS[genre_key]["base_score"]
         
@@ -320,9 +318,8 @@ with prediction_col:
                     st.write(f"⚠️ {r}")
 
         with t3:
-            # Executes text parsing matrices in memory securely
+            # Safely passes variable down-stream to similarity loops without breaking UI state trees
             with st.spinner("Processing narrative likeness vector matching lists..."):
-                # Use current language setting tracking configurations
                 historical_comps = search_movies_by_synopsis(
                     future_synopsis_text, 
                     TMDB_API_KEY
@@ -333,7 +330,6 @@ with prediction_col:
             else:
                 st.markdown("### Top Identified Narrative Archetypes")
                 for comp in historical_comps:
-                    # FIX: Extracted components cleanly inside stacked presentation rows
                     st.markdown(f"**{comp.get('title', 'Unknown Title')}**")
                     st.caption(f"Historical Narrative Plot Context: {comp.get('overview', 'N/A')}")
                     st.divider()
@@ -347,7 +343,8 @@ with search_col:
     
     query = st.text_input(
         "Search Regional Reference Title",
-        placeholder="Enter film title to pull matching archetypes..."
+        placeholder="Enter film title to pull matching archetypes...",
+        key="search_input_field"
     )
     
     movie_data = None
@@ -368,8 +365,7 @@ with search_col:
                     movie_data = fetch_movie(options[selected_label])
 
     if movie_data:
-        # Create a visually pleasing internal sidebar presentation card context
-        card_left, card_right = st.columns()
+        card_left, card_right = st.columns([1, 2])
         
         with card_left:
             if movie_data["Poster"]:
