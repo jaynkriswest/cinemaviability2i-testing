@@ -349,97 +349,106 @@ with prediction_col:
                     st.divider()
 
 # =====================================================
-# RIGHT PANEL: TITLE SEARCH ENGINE & HISTORICAL LOOKUPS
+# RIGHT PANEL: INDEPENDENT MOVIE SEARCH ENGINE (BY ID)
 # =====================================================
 
 with search_col:
-    st.header("Historical Narrative Benchmarking")
+    st.header("Movie Search")
     
     query = st.text_input(
-        "Search Regional Reference Title",
-        placeholder="Enter film title (e.g., Pushpa, Vikram, Jailer)...",
-        key="search_input_field"
+        "Search Movie",
+        placeholder="Enter movie name...",
+        key="independent_search_input"
     )
     
-    # Initialize movie_data clearly at the top of the scope
+    # Initialize movie_data clearly at the top of the layout container scope
     movie_data = None
     
     if query:
         with st.spinner("Searching title database records..."):
-            historical_pool = search_movies_by_title_raw(query)
+            # Use your search function that talks to TMDB
+            historical_pool = search_movies_by_title_raw(query) 
             
             if historical_pool:
-                # Build an explicit identity lookup map
+                # CRITICAL FIX: Map the visible label directly to the unique TMDB ID integer
                 options = {}
                 for m in historical_pool:
-                    title_str = m.get('title', 'Unknown')
+                    title_str = m.get('title', 'Unknown Title')
                     year_str = m.get('release_date', '####')[:4]
-                    label = f"{title_str} ({year_str})"
-                    options[label] = title_str
+                    movie_id = m.get('id')
+                    
+                    if movie_id:
+                        label = f"{title_str} ({year_str})"
+                        options[label] = movie_id
                 
                 selected_label = st.selectbox(
-                    "Resolve Target Entity Identity Match",
+                    "Select Movie",
                     options=list(options.keys()),
-                    key="resolved_identity_selectbox"
+                    key="resolved_movie_search_dropdown"
                 )
                 
                 if selected_label:
-                    # Explicit fetch call mapped back to variable
-                    movie_data = fetch_movie(options[selected_label])
+                    target_id = options[selected_label]
+                    
+                    # Call TMDB directly via unique ID to guarantee flawless lookup records
+                    with st.spinner("Retrieving exact movie profile metrics..."):
+                        # Ensure your API details fetcher handles structural fallbacks cleanly
+                        movie_details = fetch_full_movie_details(target_id, TMDB_API_KEY)
+                        
+                        if movie_details:
+                            # Map the API response metrics to the display card keys
+                            poster_path = movie_details.get("poster_path")
+                            poster_url = f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else None
+                            
+                            genres = [g.get("name") for g in movie_details.get("genres", [])]
+                            
+                            movie_data = {
+                                "Title": movie_details.get("title"),
+                                "Year": movie_details.get("release_date", "####")[:4],
+                                "Genre": ", ".join(genres) if genres else "N/A",
+                                "Actors": "Use Detailed View (TMDB Core Reference Entry)",
+                                "Plot": movie_details.get("overview") or "No textual summary summary cataloged.",
+                                "Poster": poster_url,
+                                "id": target_id
+                            }
             else:
-                st.warning("No historical films indexed with that exact title string.")
+                st.warning("No historical films indexed with that name.")
 
-    # RENDER ENGINE PROFILE CARD
+    # RENDER PROFILE INFRASTRUCTURE CARD
     if movie_data:
-        st.write("") # Margin spacer
-        card_left, card_right = st.columns([1, 2])
+        st.write("") # Spacer margins
         
-        with card_left:
-            # Check safely for both casing options to avoid variable mismatch dropouts
-            poster_src = movie_data.get("Poster") or movie_data.get("poster")
-            if poster_src:
-                st.image(
-                    poster_src,
-                    use_container_width=True
-                )
-            else:
-                # Placeholder container UI block when no image exists on TMDB CDN
-                st.markdown(
-                    "<div style='border:1px dashed #444; height:240px; display:flex; "
-                    "align-items:center; justify-content:center; border-radius:6px; color:#666;'>"
-                    "No Poster Found</div>", 
-                    unsafe_allow_html=True
-                )
-                
-        with card_right:
-            display_title = movie_data.get("Title") or movie_data.get("title", "Unknown Film")
-            display_year = movie_data.get("Year") or movie_data.get("year", "####")
-            display_genre = movie_data.get("Genre") or movie_data.get("genre", "N/A")
-            display_cast = movie_data.get("Actors") or movie_data.get("actors", "N/A")
+        # Display Movie Poster if available
+        if movie_data.get("Poster"):
+            st.image(movie_data["Poster"], use_container_width=True)
+        else:
+            st.markdown(
+                "<div style='border:1px dashed #444; height:240px; display:flex; "
+                "align-items:center; justify-content:center; border-radius:6px; color:#666;'>"
+                "No Poster Found</div>", 
+                unsafe_allow_html=True
+            )
             
-            st.subheader(f"{display_title} ({display_year})")
-            st.markdown(f"**Genre Blueprint:** {display_genre}")
-            st.markdown(f"**Cast Profile Matrix:** {display_cast}")
-        
-        # Display Plot Summary Context
-        display_plot = movie_data.get("Plot") or movie_data.get("plot") or "No textual summary cataloged."
-        st.markdown(f"**Narrative Synopsis Abstract:**")
-        st.info(display_plot)
+        # Display Core Information Texts
+        st.subheader(f"{movie_data['Title']} ({movie_data['Year']})")
+        st.write(f"**Genre:** {movie_data['Genre']}")
+        st.write(f"**Cast:** {movie_data['Actors']}")
+        st.info(movie_data["Plot"])
 
-        # SIMILAR CROSS REFERENCES SECTION
+        # SIMILAR REFRENCES LOOP
         st.markdown("---")
-        st.subheader("Similar Historical Box Office Archetypes")
+        st.subheader("Similar Historical Films")
 
         with st.spinner("Analyzing related database entries..."):
-            similar_movies = get_similar_movies(display_title)
+            # Pass the clean string title safely for similarity calculations
+            similar_movies = get_similar_movies(movie_data['Title'])
             
         if similar_movies:
             for movie in similar_movies:
-                sim_title = movie.get('title', 'Unknown')
-                sim_date = movie.get('release_date', '####')[:4]
-                st.markdown(f"• **{sim_title}** ({sim_date})")
+                sim_title = movie.get('title', 'Unknown Title')
+                st.markdown(f"• {sim_title}")
         else:
-            st.info("No matching historical cross-references indexed for this specific dataset.")
+            st.info("No matching historical cross-references indexed for this film profile.")
 
 # =====================================================
 # FOOTER
