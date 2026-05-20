@@ -149,13 +149,13 @@ def calculate_movie_success_status(budget, revenue):
     roi = (revenue - budget) / budget * 100 if revenue > 0 else -100
     
     if roi >= 150:
-        status = "🟢 Blockbuster Hit"
+        status = "Blockbuster Hit"
     elif roi >= 50:
-        status = "🟡 Above Average"
+        status = "Above Average"
     elif roi >= 0:
-        status = "🟠 Breakeven"
+        status = "Breakeven"
     else:
-        status = "🔴 Underperformed"
+        status = "Underperformed"
     
     return status, roi
 
@@ -175,7 +175,7 @@ except ImportError as e:
 # LAYOUT STRUCTURE
 # =====================================================
 
-st.title("🎬 South Indian Cinema Predictability Model v5")
+st.title("South Indian Cinema Predictability Model v5")
 st.divider()
 
 prediction_col, search_col = st.columns([1.3, 1], gap="large")
@@ -184,7 +184,7 @@ prediction_col, search_col = st.columns([1.3, 1], gap="large")
 # LEFT PANEL - PREDICTION ENGINE WITH HISTORICAL ANALYSIS
 # =====================================================
 with prediction_col:
-    st.header("📊 Predictability Model Engine")
+    st.header("Predictability Model Engine")
     
     # Create tabs for better organization
     tab1, tab2, tab3 = st.tabs(["Input & Analysis", "Historical Comparisons", "Recommendations"])
@@ -260,7 +260,7 @@ with prediction_col:
         st.divider()
         
         # RUN ANALYSIS
-        if st.button("🚀 Run Analytics Engine Pipeline", type="primary", use_container_width=True):
+        if st.button("Run Analytics Engine Pipeline", type="primary", use_container_width=True):
             
             # Prepare inputs for calculation
             actor_data = SOUTH_INDIAN_ACTORS.get(lead_actor, {})
@@ -310,16 +310,16 @@ with prediction_col:
             st.session_state.search_performed = True
             
             # Display results
-            st.success("✅ Analysis Complete!")
+            st.success("Analysis Complete!")
             
             # Main metrics display
-            st.subheader("🎯 Valuation Metrics")
+            st.subheader("Valuation Metrics")
             
             metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
             
             with metric_col1:
                 pred_score = prediction['predictability_score']
-                color = "🟢" if pred_score >= 80 else "🟡" if pred_score >= 70 else "🔴"
+                color = "Good" if pred_score >= 80 else "Average" if pred_score >= 70 else "Bad"
                 st.metric(
                     "Predictability Score",
                     f"{color} {pred_score}%",
@@ -335,7 +335,7 @@ with prediction_col:
             
             with metric_col3:
                 roi_val = prediction['roi_percentage']
-                roi_color = "🟢" if roi_val >= 50 else "🟡" if roi_val >= 0 else "🔴"
+                roi_color = "Good" if roi_val >= 50 else "Average" if roi_val >= 0 else "Bad"
                 st.metric(
                     "Expected ROI",
                     f"{roi_color} {roi_val:.1f}%",
@@ -350,7 +350,7 @@ with prediction_col:
                 )
             
             # Breakdown scores
-            st.subheader("📈 Score Breakdown")
+            st.subheader("Score Breakdown")
             breakdown_df = pd.DataFrame({
                 'Component': list(prediction['breakdown'].keys()),
                 'Score': list(prediction['breakdown'].values())
@@ -364,38 +364,38 @@ with prediction_col:
                 st.bar_chart(breakdown_df.set_index('Component')['Score'])
             
             # ROI scenarios
-            st.subheader("📊 ROI Scenarios")
+            st.subheader("ROI Scenarios")
             scenario_col1, scenario_col2, scenario_col3 = st.columns(3)
             
             with scenario_col1:
                 st.metric(
                     "Optimistic Case",
-                    f"🟢 {prediction['roi_optimistic']:.1f}%",
+                    f"Good {prediction['roi_optimistic']:.1f}%",
                     delta="(Best Case)"
                 )
             
             with scenario_col2:
                 st.metric(
                     "Expected Case",
-                    f"🟡 {prediction['roi_percentage']:.1f}%",
+                    f"Average {prediction['roi_percentage']:.1f}%",
                     delta="(Current Inputs)"
                 )
             
             with scenario_col3:
                 st.metric(
                     "Pessimistic Case",
-                    f"🔴 {prediction['roi_pessimistic']:.1f}%",
+                    f"Bad {prediction['roi_pessimistic']:.1f}%",
                     delta="(Worst Case)"
                 )
     
     with tab2:
-        st.subheader("🎬 Historical Movie Comparisons")
+        st.subheader("Historical Movie Comparisons")
         
         if st.session_state.get('search_performed'):
             movie_details = st.session_state.get('movie_details', {})
             
             # Search for similar movies
-            st.info("🔍 Searching for historically similar movies...")
+            st.info("Searching for historically similar movies...")
             
             similar_movies = search_similar_movies_by_synopsis(
                 synopsis=movie_details.get('synopsis', ''),
@@ -405,7 +405,7 @@ with prediction_col:
             )
             
             if similar_movies:
-                st.success(f"✅ Found {len(similar_movies)} similar movies from database")
+                st.success(f"Found {len(similar_movies)} similar movies from database")
                 
                 # Create comparison table
                 comparison_data = []
@@ -433,7 +433,7 @@ with prediction_col:
                     st.dataframe(comparison_df, use_container_width=True, hide_index=True)
                     
                     # Detailed analysis
-                    st.subheader("💡 Insights from Similar Movies")
+                    st.subheader("Insights from Similar Movies")
                     
                     success_count = sum(1 for d in comparison_data if '🟢' in d['Status'] or '🟡' in d['Status'])
                     avg_rating = 0
