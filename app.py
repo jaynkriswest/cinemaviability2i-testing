@@ -1,6 +1,6 @@
 # Updated from Main folder updated from testing (Claudegem1i)
 
-# app.py - Fully Fixed Production Version
+# app.py - Production Layout and Argument Synchronizer
 
 import streamlit as st
 import requests
@@ -145,6 +145,20 @@ def get_similar_movies(title):
         logger.error(f"Error fetching similar movies: {e}")
     return []
 
+def search_movies_by_title_raw(title_query):
+    """Direct Title Search helper loop for the Benchmarking column"""
+    url = "https://api.themoviedb.org/3/search/movie"
+    params = {
+        "api_key": TMDB_API_KEY,
+        "query": title_query,
+        "region": "IN"
+    }
+    try:
+        res = requests.get(url, params=params, timeout=5)
+        return res.json().get("results", [])[:5]
+    except:
+        return []
+
 # Fetch genre maps once dynamically
 if "genre_id_map" not in st.session_state:
     try:
@@ -226,7 +240,6 @@ with prediction_col:
         step=0.01
     )
 
-    # FIXED: Re-mapped text area tracking variable name to exactly match down-script dependencies
     future_synopsis_text = st.text_area(
         "Future Script Synopsis/Treatment (For Similarity Processing)",
         value="A dynamic protagonist works within an underground network, taking on powerful elements to restore equilibrium and rescue hostages.",
@@ -318,7 +331,7 @@ with prediction_col:
                     st.write(f"⚠️ {r}")
 
         with t3:
-            # Safely passes variable down-stream to similarity loops without breaking UI state trees
+            # FIXED: Calls function with exactly two matched parameters to prevent parameter crashes
             with st.spinner("Processing narrative likeness vector matching lists..."):
                 historical_comps = search_movies_by_synopsis(
                     future_synopsis_text, 
@@ -330,12 +343,13 @@ with prediction_col:
             else:
                 st.markdown("### Top Identified Narrative Archetypes")
                 for comp in historical_comps:
-                    st.markdown(f"**{comp.get('title', 'Unknown Title')}**")
+                    st.markdown(f"**{comp.get('title', 'Unknown Title')} ({comp.get('release_year', '####')})**")
                     st.caption(f"Historical Narrative Plot Context: {comp.get('overview', 'N/A')}")
+                    st.write(f"**Thematic Likeness Score:** {comp.get('likeness_score', 0)}%")
                     st.divider()
 
 # =====================================================
-# RIGHT PANEL: SEARCH ENGINE & HISTORICAL LOOKUPS
+# RIGHT PANEL: TITLE SEARCH ENGINE & HISTORICAL LOOKUPS
 # =====================================================
 
 with search_col:
@@ -343,14 +357,15 @@ with search_col:
     
     query = st.text_input(
         "Search Regional Reference Title",
-        placeholder="Enter film title to pull matching archetypes...",
+        placeholder="Enter film title (e.g., Pushpa, Vikram, Jailer)...",
         key="search_input_field"
     )
     
     movie_data = None
     if query:
-        with st.spinner("Fetching contextual data vectors..."):
-            historical_pool = search_movies_by_synopsis(query, TMDB_API_KEY)
+        with st.spinner("Searching title database records..."):
+            # FIXED: Uses direct keyword search instead of passing text titles into plot parser functions
+            historical_pool = search_movies_by_title_raw(query)
             
             if historical_pool:
                 options = {
@@ -363,9 +378,11 @@ with search_col:
                 )
                 if selected_label:
                     movie_data = fetch_movie(options[selected_label])
+            else:
+                st.warning("No historical films indexed with that exact title string.")
 
     if movie_data:
-        card_left, card_right = st.columns([1, 2])
+        card_left, card_right = st.columns()
         
         with card_left:
             if movie_data["Poster"]:
