@@ -84,7 +84,7 @@ with search_col:
                 with results_container:
                     if movie_details:
                         # FIXED: Added weight to prevent TypeError
-                        card_left, card_right = st.columns() 
+                        card_left, card_right = st.columns(2) 
                         with card_left:
                             if movie_details.get("poster_path"):
                                 st.image(f"https://image.tmdb.org/t/p/w500{movie_details['poster_path']}", use_container_width=True)
