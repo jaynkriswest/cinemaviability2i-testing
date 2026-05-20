@@ -174,3 +174,6 @@ def search_movies_by_title_raw_internal(title_query):
 st.divider()
 st.markdown("""
 <div style="text-align: center; color: #666; font-size: 0.85em;">
+    <p>Cinema Predictability Model v5 | Powered by OMDB/TMDB APIs</p>
+</div>
+""", unsafe_allow_html=True)
