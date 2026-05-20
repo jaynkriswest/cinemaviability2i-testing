@@ -56,7 +56,6 @@ def search_movies_by_synopsis(
 
             "sci-fi": [
                 "robot",
-                "ai",
                 "technology",
                 "future",
                 "space",

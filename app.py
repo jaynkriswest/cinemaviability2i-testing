@@ -1,6 +1,6 @@
-#Updated from Main folder updated from testing (Claudegem1i)
+#Updated from Main folder updated from testing (Cldegem1i)
 
-# app.py - new version
+# app.py - updated version
 
 import streamlit as st
 import requests
