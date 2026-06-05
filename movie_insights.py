@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-# movie_insights.py - Completed Production Synchronization Version
-=======
 # movie_insights.py - Completed Production Synchronization Version 06052026 - 1104hrs
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
 
 # movie_insights.py
 import requests
