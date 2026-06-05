@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # formula.py - Clde version
+=======
+# formula.py - Clde version 06052026 - 1104hrs
+>>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
 # Complete predictability calculation with proper ROI estimation
 
 def calculate_v3i_logic(inputs):
