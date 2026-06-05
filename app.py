@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-=======
-#Updated from Main folder updated from testing (Cldegem1i)
-
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
 # Enhanced Cinema Intelligence Platform v5
 # Complete Left Panel with Historical Analysis and Actionable Recommendations
 
@@ -180,7 +175,7 @@ except ImportError as e:
 # LAYOUT STRUCTURE
 # =====================================================
 
-st.title("South Indian Cinema Predictability Model v5")
+st.title("South Indian Cinema Predictability Model v5 - Cldegem 1i testing")
 st.divider()
 
 prediction_col, search_col = st.columns([1.3, 1], gap="large")
@@ -453,26 +448,16 @@ with prediction_col:
                     
                     st.markdown("**Key Takeaways:**")
                     if success_count > len(comparison_data) * 0.6:
-<<<<<<< HEAD
                         st.markdown("✅ Similar movies have performed well historically - good market signals")
                     else:
                         st.markdown("⚠️ Mixed historical performance - requires strategic differentiation")
-=======
-                        st.markdown("Similar movies have performed well historically - good market signals")
-                    else:
-                        st.markdown("Mixed historical performance - requires strategic differentiation")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
                     
                 else:
                     st.warning("Could not fetch box office data for similar movies.")
             else:
                 st.warning("No similar movies found in database. Try refining your synopsis.")
         else:
-<<<<<<< HEAD
             st.info("👈 Run the analysis in the 'Input & Analysis' tab first to see historical comparisons.")
-=======
-            st.info("Run the analysis in the 'Input & Analysis' tab first to see historical comparisons.")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
     
     with tab3:
         st.subheader("💼 Strategic Recommendations")
@@ -483,17 +468,10 @@ with prediction_col:
             
             pred_score = prediction.get('predictability_score', 50)
             
-<<<<<<< HEAD
             st.subheader("🎯 Actionable Improvement Strategies")
             
             # Release Date Optimization
             st.markdown("### 📅 Release Date Optimization")
-=======
-            st.subheader("Actionable Improvement Strategies")
-            
-            # Release Date Optimization
-            st.markdown("### Release Date Optimization")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
             
             release_month = movie_details.get('release_month', 1)
             current_seasonal = SEASONAL_MULTIPLIERS.get(release_month, 1.0)
@@ -513,7 +491,6 @@ with prediction_col:
             potential_gain = ((best_multiplier / current_seasonal) - 1) * 100
             
             if potential_gain > 10:
-<<<<<<< HEAD
                 st.success(f"💡 **Shifting release can improve ROI by ~{potential_gain:.0f}%**")
                 st.markdown(f"- January, October, November, December typically see higher footfalls")
                 st.markdown(f"- Avoid July-August (monsoon season) and March (summer heat)")
@@ -522,25 +499,11 @@ with prediction_col:
             
             # Marketing & Promotion Strategy
             st.markdown("### 📢 Marketing & Promotion Strategy")
-=======
-                st.success(f"**Shifting release can improve ROI by ~{potential_gain:.0f}%**")
-                st.markdown(f"- January, October, November, December typically see higher footfalls")
-                st.markdown(f"- Avoid July-August (monsoon season) and March (summer heat)")
-            else:
-                st.info("Your current release month is already well-optimized.")
-            
-            # Marketing & Promotion Strategy
-            st.markdown("### Marketing & Promotion Strategy")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
             
             viral_score = movie_details.get('viral_score', 70)
             
             if viral_score < 60:
-<<<<<<< HEAD
                 st.warning("⚠️ **Low Viral Potential Detected**")
-=======
-                st.warning("**Low Viral Potential Detected**")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
                 st.markdown("""
                 **Recommended Actions:**
                 - Increase social media teaser campaign intensity
@@ -550,11 +513,7 @@ with prediction_col:
                 - Expected ROI improvement: +15-20%
                 """)
             elif viral_score < 80:
-<<<<<<< HEAD
                 st.info("🟡 **Moderate Viral Potential**")
-=======
-                st.info("**Moderate Viral Potential**")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
                 st.markdown("""
                 **Recommended Actions:**
                 - Standard 6-8 week marketing campaign
@@ -563,11 +522,7 @@ with prediction_col:
                 - Expected ROI improvement: +5-10%
                 """)
             else:
-<<<<<<< HEAD
                 st.success("🟢 **Strong Viral Potential**")
-=======
-                st.success("**Strong Viral Potential**")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
                 st.markdown("""
                 **Recommended Actions:**
                 - Lean into organic word-of-mouth
@@ -577,11 +532,7 @@ with prediction_col:
                 """)
             
             # Theater Distribution Strategy
-<<<<<<< HEAD
             st.markdown("### 🎭 Theater Distribution Strategy")
-=======
-            st.markdown("### Theater Distribution Strategy")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
             
             theaters = movie_details.get('theaters', 1000)
             budget = movie_details.get('budget', 80)
@@ -595,22 +546,14 @@ with prediction_col:
             
             if theaters < recommended_theaters * 0.8:
                 increase_pct = ((recommended_theaters / theaters) - 1) * 100
-<<<<<<< HEAD
                 st.success(f"💡 **Increase theater count by ~{increase_pct:.0f}% to maximize reach**")
-=======
-                st.success(f"**Increase theater count by ~{increase_pct:.0f}% to maximize reach**")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
                 st.markdown("""
                 - More theaters = better first-week collection potential
                 - Reduces per-theater average decline
                 - Expected ROI improvement: +8-12%
                 """)
             elif theaters > recommended_theaters * 1.2:
-<<<<<<< HEAD
                 st.warning(f"⚠️ **Theater count might be overshooting capacity**")
-=======
-                st.warning(f"**Theater count might be overshooting capacity**")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
                 st.markdown("""
                 - Too many theaters risk diluting per-screen averages
                 - Consider quality over quantity
@@ -618,11 +561,7 @@ with prediction_col:
                 - Expected cost savings: 5-10% of print/distribution costs
                 """)
             else:
-<<<<<<< HEAD
                 st.success("✅ Theater distribution looks optimal")
-=======
-                st.success("Theater distribution looks optimal")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
             
             # Content Strategy
             st.markdown("### 🎬 Content & Positioning Strategy")
@@ -630,11 +569,7 @@ with prediction_col:
             content_score = movie_details.get('content_score', 75)
             
             if content_score < 70:
-<<<<<<< HEAD
                 st.warning("⚠️ **Content Quality Concerns**")
-=======
-                st.warning("**Content Quality Concerns**")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
                 st.markdown("""
                 **Recommended Actions:**
                 - Invest in screenplay rewrites
@@ -644,11 +579,7 @@ with prediction_col:
                 - Expected ROI improvement: +20-25% (if successful)
                 """)
             else:
-<<<<<<< HEAD
                 st.success("✅ Content quality is strong - leverage this in marketing")
-=======
-                st.success("Content quality is strong - leverage this in marketing")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
                 st.markdown("""
                 **Marketing angle:**
                 - Emphasize strong storyline in trailers
@@ -657,11 +588,7 @@ with prediction_col:
                 """)
             
             # Budget Optimization
-<<<<<<< HEAD
             st.markdown("### 💰 Budget & Financial Strategy")
-=======
-            st.markdown("### Budget & Financial Strategy")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
             
             roi = prediction.get('roi_percentage', 0)
             
@@ -691,11 +618,7 @@ with prediction_col:
             """)
             
             # Success/Failure Risk Analysis
-<<<<<<< HEAD
             st.markdown("### ⚠️ Risk Mitigation")
-=======
-            st.markdown("### Risk Mitigation")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
             
             success_reasons = analyze_success_reasons({
                 'talent_score': movie_details.get('content_score', 75),
@@ -714,11 +637,7 @@ with prediction_col:
             col1, col2 = st.columns(2)
             
             with col1:
-<<<<<<< HEAD
                 st.subheader("✅ Success Factors")
-=======
-                st.subheader("Success Factors")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
                 if success_reasons:
                     for reason in success_reasons:
                         st.markdown(f"- {reason}")
@@ -726,11 +645,7 @@ with prediction_col:
                     st.markdown("- Solid foundation for success")
             
             with col2:
-<<<<<<< HEAD
                 st.subheader("⚠️ Risk Factors")
-=======
-                st.subheader("Risk Factors")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
                 if failure_reasons:
                     for reason in failure_reasons:
                         st.markdown(f"- {reason}")
@@ -782,11 +697,7 @@ with prediction_col:
                 """)
         
         else:
-<<<<<<< HEAD
             st.info("👈 Run the analysis in the 'Input & Analysis' tab first to get recommendations.")
-=======
-            st.info("Run the analysis in the 'Input & Analysis' tab first to get recommendations.")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
 
 # =====================================================
 # RIGHT PANEL - SEARCH (EXISTING FUNCTIONALITY)
@@ -817,11 +728,7 @@ with search_col:
                         with card_right:
                             st.subheader(f"{movie_details.get('title')}")
                             st.write(f"**Release:** {movie_details.get('release_date', 'N/A')}")
-<<<<<<< HEAD
                             st.write(f"**Rating:** ⭐ {movie_details.get('vote_average', 'N/A')}/10")
-=======
-                            st.write(f"**Rating:** {movie_details.get('vote_average', 'N/A')}/10")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
                             st.write(f"**Genre:** {', '.join([g['name'] for g in movie_details.get('genres', [])])}")
                             st.write(f"**Runtime:** {movie_details.get('runtime', 'N/A')} minutes")
                             st.write(f"**Cast:** {movie_details.get('extracted_cast', 'N/A')}")
@@ -832,11 +739,7 @@ with search_col:
                         
                         if movie_details.get("extracted_recommendations"):
                             st.divider()
-<<<<<<< HEAD
                             st.subheader("🎬 Similar Movies You Might Like")
-=======
-                            st.subheader("Similar Movies You Might Like")
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
                             for rec in movie_details.get("extracted_recommendations", [])[:5]:
                                 st.markdown(f"• **{rec.get('title')}** ({rec.get('release_date', 'N/A')[:4]}) - ⭐ {rec.get('vote_average', 'N/A')}/10")
         else:
