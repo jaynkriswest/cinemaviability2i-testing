@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-# data.py - Clde version
-=======
 # data.py - Clde version 06052026 - 1104hrs
->>>>>>> 38012400aacfc2c3291e61b3ade7142ac1b95d44
 # Complete South Indian Cinema Database with Genre Metrics
 
 GENRE_METRICS = {
